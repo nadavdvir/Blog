@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apex Capital — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --white: #fafaf8;
+      --black: #111110;
+      --grey-dark: #3a3a38;
+      --grey-mid: #8a8a87;
+      --grey-light: #d4d3ce;
+      --border: #e2e1dc;
+      --red: #c0392b;
+      --green: #27ae60;
+    }
+
+    body {
+      background: var(--white);
+      color: var(--black);
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* LOGIN */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-logo {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--grey-mid);
+      margin-bottom: 48px;
+    }
+
+    .login-title {
+      font-size: 32px;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+
+    .login-sub {
+      font-size: 15px;
+      color: var(--grey-mid);
+      margin-bottom: 40px;
+    }
+
+    .form-group { margin-bottom: 24px; }
+
+    label {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--grey-mid);
+      margin-bottom: 8px;
+    }
+
+    input[type="password"], input[type="text"], textarea, select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      font-family: 'EB Garamond', serif;
+      font-size: 17px;
+      color: var(--black);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--grey-dark); }
+
+    textarea { resize: vertical; min-height: 280px; line-height: 1.7; }
+
+    .btn {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 12px 28px;
+      border: 1px solid var(--black);
+      background: var(--black);
+      color: var(--white);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--grey-dark); border-color: var(--grey-dark); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--black);
+    }
+    .btn-ghost:hover { background: var(--off-white); color: var(--black); }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border-color: var(--red);
+    }
+    .btn-danger:hover { background: var(--red); color: var(--white); }
+
+    .btn-sm { padding: 8px 18px; font-size: 10px; }
+
+    .error-msg {
+      color: var(--red);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      margin-top: 12px;
+    }
+
+    /* ADMIN LAYOUT */
+    .admin { display: none; }
+    .admin.active { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 240px;
+      min-width: 240px;
+      border-right: 1px solid var(--border);
+      padding: 32px 0;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--grey-mid);
+      padding: 0 28px;
+      margin-bottom: 40px;
+    }
+
+    .sidebar-section {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--grey-light);
+      padding: 0 28px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-nav { list-style: none; margin-bottom: 32px; }
+
+    .sidebar-nav li a {
+      display: block;
+      padding: 10px 28px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--grey-mid);
+      text-decoration: none;
+      transition: color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+
+    .sidebar-nav li a:hover { color: var(--black); background: var(--off-white); }
+    .sidebar-nav li a.active { color: var(--black); font-weight: 400; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 0 28px;
+    }
+
+    .sidebar-footer a {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--grey-mid);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .sidebar-footer a:hover { color: var(--black); }
+
+    /* MAIN CONTENT */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .panel { display: none; padding: 60px; }
+    .panel.active { display: block; }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 48px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      font-size: 36px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    /* STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      margin-bottom: 60px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      padding: 36px;
+    }
+
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--grey-mid);
+      margin-bottom: 12px;
+    }
+
+    .stat-value {
+      font-size: 40px;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    /* POSTS TABLE */
+    .posts-table { width: 100%; border-collapse: collapse; }
+
+    .posts-table th {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--grey-mid);
+      text-align: left;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .posts-table td {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .posts-table tr:last-child td { border-bottom: none; }
+
+    .post-row-title { font-size: 17px; margin-bottom: 4px; }
+    .post-row-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--grey-mid);
+    }
+
+    .status-badge {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      color: var(--grey-mid);
+    }
+    .status-badge.published {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .row-actions { display: flex; gap: 8px; }
+
+    /* EDITOR */
+    .editor-form { max-width: 800px; }
+    .editor-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .form-hint {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--grey-mid);
+      margin-top: 6px;
+    }
+
+    .editor-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .success-msg {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--green);
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      padding: 80px 0;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--grey-mid);
+    }
+
+    select {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <div class="login-logo">Apex Capital</div>
+      <h1 class="login-title">Admin access</h1>
+      <p class="login-sub">Enter your password to continue.</p>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn" onclick="attemptLogin()">Sign in →</button>
+      <div class="error-msg" id="loginError" style="display:none;">Incorrect password.</div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="admin" id="adminPanel">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">Apex Admin</div>
+      <div class="sidebar-section">Content</div>
+      <ul class="sidebar-nav">
+        <li><a onclick="showPanel('dashboard')" class="active" id="nav-dashboard">Dashboard</a></li>
+        <li><a onclick="showPanel('posts')" id="nav-posts">All Posts</a></li>
+        <li><a onclick="showPanel('new')" id="nav-new">New Post</a></li>
+      </ul>
+      <div class="sidebar-footer">
+        <a href="index.html" target="_blank">← View site</a><br><br>
+        <a onclick="logout()">Sign out</a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+
+      <!-- Dashboard -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="panel-header">
+          <h1 class="panel-title">Dashboard</h1>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card">
+            <div class="stat-label">Total Posts</div>
+            <div class="stat-value" id="statTotal">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Published</div>
+            <div class="stat-value" id="statPublished">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Views</div>
+            <div class="stat-value" id="statViews">0</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--grey-mid);">Recent Posts</div>
+          <button class="btn btn-sm" onclick="showPanel('new')">+ New Post</button>
+        </div>
+
+        <div id="recentPosts"></div>
+      </div>
+
+      <!-- All Posts -->
+      <div class="panel" id="panel-posts">
+        <div class="panel-header">
+          <h1 class="panel-title">All Posts</h1>
+          <button class="btn btn-sm" onclick="showPanel('new')">+ New Post</button>
+        </div>
+        <div id="allPostsList"></div>
+      </div>
+
+      <!-- New / Edit Post -->
+      <div class="panel" id="panel-new">
+        <div class="panel-header">
+          <h1 class="panel-title" id="editorTitle">New Post</h1>
+        </div>
+
+        <div class="editor-form">
+          <input type="hidden" id="editId" />
+
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="postTitle" placeholder="Post title" />
+          </div>
+
+          <div class="editor-row">
+            <div class="form-group">
+              <label>Category</label>
+              <input type="text" id="postCategory" placeholder="e.g. Markets, Macro, Company" />
+            </div>
+            <div class="form-group">
+              <label>Date</label>
+              <input type="text" id="postDate" placeholder="e.g. 2026-02-14" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Excerpt <span style="font-weight:300; text-transform:none; letter-spacing:0;">(optional short preview)</span></label>
+            <input type="text" id="postExcerpt" placeholder="One-line preview shown on the homepage" />
+          </div>
+
+          <div class="form-group">
+            <label>Body</label>
+            <textarea id="postBody" placeholder="Write your post here. Separate paragraphs with a blank line."></textarea>
+            <div class="form-hint">Separate paragraphs with a blank line (double Enter)</div>
+          </div>
+
+          <div class="form-group">
+            <label>Status</label>
+            <select id="postStatus">
+              <option value="draft">Draft — not visible on site</option>
+              <option value="published">Published — visible on site</option>
+            </select>
+          </div>
+
+          <div class="editor-actions">
+            <button class="btn" onclick="savePost()">Save Post</button>
+            <button class="btn btn-ghost" onclick="clearEditor()">Clear</button>
+            <span class="success-msg" id="saveSuccess" style="display:none;">Saved ✓</span>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // ── Config ──
+    // CHANGE THIS PASSWORD before going live!
+    const ADMIN_PASSWORD = 'apexadmin2026';
+
+    // ── Auth ──
+    function attemptLogin() {
+      const pw = document.getElementById('passwordInput').value;
+      if (pw === ADMIN_PASSWORD) {
+        sessionStorage.setItem('apex_auth', '1');
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('adminPanel').classList.add('active');
+        refreshDashboard();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    }
+
+    document.getElementById('passwordInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') attemptLogin();
+    });
+
+    function logout() {
+      sessionStorage.removeItem('apex_auth');
+      location.reload();
+    }
+
+    // Check if already authed this session
+    if (sessionStorage.getItem('apex_auth')) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminPanel').classList.add('active');
+    }
+
+    // ── Data ──
+    function getPosts() {
+      try { return JSON.parse(localStorage.getItem('apex_posts') || '[]'); }
+      catch { return []; }
+    }
+
+    function savePosts(posts) {
+      localStorage.setItem('apex_posts', JSON.stringify(posts));
+    }
+
+    function formatDate(iso) {
+      try {
+        return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      } catch { return iso; }
+    }
+
+    // ── Panel navigation ──
+    function showPanel(name) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+      document.getElementById('panel-' + name).classList.add('active');
+      document.getElementById('nav-' + name).classList.add('active');
+
+      if (name === 'dashboard') refreshDashboard();
+      if (name === 'posts') refreshPostsList();
+      if (name === 'new') {
+        document.getElementById('editorTitle').textContent = 'New Post';
+        if (!document.getElementById('editId').value) {
+          // Set today's date as default
+          document.getElementById('postDate').value = new Date().toISOString().slice(0, 10);
+        }
+      }
+    }
+
+    // ── Dashboard ──
+    function refreshDashboard() {
+      const posts = getPosts();
+      const published = posts.filter(p => p.published);
+      const totalViews = posts.reduce((sum, p) => sum + (p.views || 0), 0);
+
+      document.getElementById('statTotal').textContent = posts.length;
+      document.getElementById('statPublished').textContent = published.length;
+      document.getElementById('statViews').textContent = totalViews;
+
+      const recent = [...posts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+      const container = document.getElementById('recentPosts');
+
+      if (!recent.length) {
+        container.innerHTML = '<div class="empty-state">No posts yet. <a onclick="showPanel(\'new\')" style="cursor:pointer; text-decoration:underline;">Create your first post →</a></div>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table class="posts-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Views</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${recent.map(post => `
+              <tr>
+                <td>
+                  <div class="post-row-title">${post.title}</div>
+                  <div class="post-row-meta">${post.category || '—'}</div>
+                </td>
+                <td><span class="status-badge ${post.published ? 'published' : ''}">${post.published ? 'Published' : 'Draft'}</span></td>
+                <td style="font-family:'DM Mono',monospace; font-size:13px;">${post.views || 0}</td>
+                <td style="font-family:'DM Mono',monospace; font-size:11px; color:var(--grey-mid);">${formatDate(post.date)}</td>
+                <td><div class="row-actions">
+                  <button class="btn btn-ghost btn-sm" onclick="editPost('${post.id}')">Edit</button>
+                  <button class="btn btn-danger btn-sm" onclick="deletePost('${post.id}')">Delete</button>
+                </div></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ── All Posts ──
+    function refreshPostsList() {
+      const posts = getPosts().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const container = document.getElementById('allPostsList');
+
+      if (!posts.length) {
+        container.innerHTML = '<div class="empty-state">No posts yet.</div>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table class="posts-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Views</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${posts.map(post => `
+              <tr>
+                <td><div class="post-row-title">${post.title}</div></td>
+                <td style="font-family:'DM Mono',monospace; font-size:11px; color:var(--grey-mid);">${post.category || '—'}</td>
+                <td><span class="status-badge ${post.published ? 'published' : ''}">${post.published ? 'Published' : 'Draft'}</span></td>
+                <td style="font-family:'DM Mono',monospace; font-size:13px;">${post.views || 0}</td>
+                <td style="font-family:'DM Mono',monospace; font-size:11px; color:var(--grey-mid);">${formatDate(post.date)}</td>
+                <td><div class="row-actions">
+                  <button class="btn btn-ghost btn-sm" onclick="editPost('${post.id}')">Edit</button>
+                  <button class="btn btn-danger btn-sm" onclick="deletePost('${post.id}')">Delete</button>
+                </div></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // ── Editor ──
+    function clearEditor() {
+      document.getElementById('editId').value = '';
+      document.getElementById('postTitle').value = '';
+      document.getElementById('postCategory').value = '';
+      document.getElementById('postDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('postExcerpt').value = '';
+      document.getElementById('postBody').value = '';
+      document.getElementById('postStatus').value = 'draft';
+      document.getElementById('editorTitle').textContent = 'New Post';
+      document.getElementById('saveSuccess').style.display = 'none';
+    }
+
+    function editPost(id) {
+      const post = getPosts().find(p => p.id === id);
+      if (!post) return;
+
+      document.getElementById('editId').value = post.id;
+      document.getElementById('postTitle').value = post.title;
+      document.getElementById('postCategory').value = post.category || '';
+      document.getElementById('postDate').value = post.date;
+      document.getElementById('postExcerpt').value = post.excerpt || '';
+      document.getElementById('postBody').value = post.body;
+      document.getElementById('postStatus').value = post.published ? 'published' : 'draft';
+      document.getElementById('editorTitle').textContent = 'Edit Post';
+      document.getElementById('saveSuccess').style.display = 'none';
+
+      showPanel('new');
+    }
+
+    function savePost() {
+      const title = document.getElementById('postTitle').value.trim();
+      const body = document.getElementById('postBody').value.trim();
+
+      if (!title) { alert('Please enter a title.'); return; }
+      if (!body) { alert('Please enter post content.'); return; }
+
+      const posts = getPosts();
+      const existingId = document.getElementById('editId').value;
+
+      const postData = {
+        id: existingId || Date.now().toString(),
+        title,
+        category: document.getElementById('postCategory').value.trim(),
+        date: document.getElementById('postDate').value || new Date().toISOString().slice(0, 10),
+        excerpt: document.getElementById('postExcerpt').value.trim(),
+        body,
+        published: document.getElementById('postStatus').value === 'published',
+        createdAt: existingId ? (posts.find(p => p.id === existingId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+        views: existingId ? (posts.find(p => p.id === existingId)?.views || 0) : 0,
+      };
+
+      if (existingId) {
+        const idx = posts.findIndex(p => p.id === existingId);
+        if (idx !== -1) posts[idx] = postData;
+        else posts.push(postData);
+      } else {
+        posts.push(postData);
+        document.getElementById('editId').value = postData.id;
+      }
+
+      savePosts(posts);
+      document.getElementById('saveSuccess').style.display = 'inline';
+      setTimeout(() => document.getElementById('saveSuccess').style.display = 'none', 3000);
+    }
+
+    function deletePost(id) {
+      if (!confirm('Delete this post? This cannot be undone.')) return;
+      const posts = getPosts().filter(p => p.id !== id);
+      savePosts(posts);
+      refreshDashboard();
+      refreshPostsList();
+    }
+
+    // Init dashboard on load if authed
+    if (sessionStorage.getItem('apex_auth')) {
+      refreshDashboard();
+    }
+  </script>
+</body>
+</html>
