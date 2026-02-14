@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Apex Capital — Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <!-- Quill rich text editor -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -22,24 +24,23 @@
     .login-sub { font-size: 15px; color: var(--grey-mid); margin-bottom: 40px; }
     .form-group { margin-bottom: 24px; }
     label { display: block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--grey-mid); margin-bottom: 8px; }
-    input[type="password"], input[type="text"], input[type="date"], textarea, select {
+    input[type="password"], input[type="text"], input[type="date"], select {
       width: 100%; padding: 12px 16px; border: 1px solid var(--border); background: var(--white);
       font-family: 'EB Garamond', serif; font-size: 17px; color: var(--black); outline: none; transition: border-color 0.2s;
     }
-    input:focus, textarea:focus, select:focus { border-color: var(--grey-dark); }
-    textarea { resize: vertical; min-height: 280px; line-height: 1.7; }
-    select { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 0.06em; }
-    .btn { display: inline-block; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; padding: 12px 28px; border: 1px solid var(--black); background: var(--black); color: var(--white); cursor: pointer; transition: background 0.2s; }
+    input:focus, select:focus { border-color: var(--grey-dark); }
+    select { font-family: 'DM Mono', monospace; font-size: 12px; }
+    .btn { display: inline-block; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; padding: 12px 28px; border: 1px solid var(--black); background: var(--black); color: var(--white); cursor: pointer; transition: background 0.2s; text-decoration: none; }
     .btn:hover { background: var(--grey-dark); border-color: var(--grey-dark); }
     .btn-ghost { background: transparent; color: var(--black); }
     .btn-ghost:hover { background: #f0efeb; color: var(--black); }
     .btn-danger { background: transparent; color: var(--red); border-color: var(--red); }
     .btn-danger:hover { background: var(--red); color: var(--white); }
     .btn-sm { padding: 7px 16px; font-size: 10px; }
-    .error-msg { color: var(--red); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em; margin-top: 12px; }
-    .success-msg { color: var(--green); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em; }
+    .error-msg { color: var(--red); font-family: 'DM Mono', monospace; font-size: 11px; margin-top: 12px; }
+    .success-msg { font-family: 'DM Mono', monospace; font-size: 11px; }
 
-    /* ADMIN */
+    /* ADMIN LAYOUT */
     .admin { display: none; }
     .admin.active { display: flex; min-height: 100vh; }
     .sidebar { width: 230px; min-width: 230px; border-right: 1px solid var(--border); padding: 32px 0; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
@@ -52,6 +53,7 @@
     .sidebar-footer { margin-top: auto; padding: 0 28px; display: flex; flex-direction: column; gap: 12px; }
     .sidebar-footer a { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grey-mid); text-decoration: none; cursor: pointer; transition: color 0.2s; }
     .sidebar-footer a:hover { color: var(--black); }
+
     .main-content { flex: 1; overflow-y: auto; }
     .panel { display: none; padding: 60px; }
     .panel.active { display: block; }
@@ -70,19 +72,56 @@
     .posts-table td { padding: 20px 0; border-bottom: 1px solid var(--border); vertical-align: middle; }
     .posts-table tr:last-child td { border-bottom: none; }
     .post-row-title { font-size: 17px; margin-bottom: 4px; }
-    .post-row-meta { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: var(--grey-mid); }
+    .post-row-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--grey-mid); }
     .status-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--border); color: var(--grey-mid); }
     .status-badge.published { border-color: var(--green); color: var(--green); }
     .row-actions { display: flex; gap: 8px; }
-    .empty-state { padding: 60px 0; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--grey-mid); }
+    .empty-state { padding: 60px 0; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--grey-mid); }
+    .mono-sm { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--grey-mid); }
 
     /* EDITOR */
-    .editor-form { max-width: 760px; }
+    .editor-form { max-width: 860px; }
     .editor-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    .form-hint { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: var(--grey-mid); margin-top: 6px; }
+    .editor-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 24px; }
+    .form-hint { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--grey-mid); margin-top: 6px; }
     .editor-actions { display: flex; gap: 16px; align-items: center; margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--border); }
 
-    .mono-sm { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--grey-mid); letter-spacing: 0.06em; }
+    /* QUILL OVERRIDES */
+    .ql-toolbar.ql-snow {
+      border: 1px solid var(--border);
+      border-bottom: none;
+      background: #f7f6f2;
+      font-family: 'DM Mono', monospace;
+      padding: 10px 12px;
+    }
+    .ql-container.ql-snow {
+      border: 1px solid var(--border);
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.75;
+      min-height: 420px;
+    }
+    .ql-editor {
+      padding: 24px 28px;
+      color: var(--black);
+    }
+    .ql-editor p { margin-bottom: 16px; }
+    .ql-editor h1 { font-size: 36px; font-weight: 400; line-height: 1.15; margin-bottom: 20px; letter-spacing: -0.01em; }
+    .ql-editor h2 { font-size: 28px; font-weight: 400; line-height: 1.2; margin-bottom: 16px; letter-spacing: -0.01em; }
+    .ql-editor h3 { font-size: 22px; font-weight: 400; line-height: 1.25; margin-bottom: 12px; }
+    .ql-editor blockquote { border-left: 3px solid var(--grey-light); padding-left: 20px; margin: 24px 0; color: var(--grey-dark); font-style: italic; }
+    .ql-editor ul, .ql-editor ol { padding-left: 24px; margin-bottom: 16px; }
+    .ql-editor li { margin-bottom: 6px; }
+    .ql-editor a { color: var(--black); text-decoration: underline; }
+    .ql-editor strong { font-weight: 600; }
+    .ql-editor img { max-width: 100%; height: auto; margin: 24px 0; }
+    .ql-editor .ql-size-huge { font-size: 2em; }
+    .ql-editor .ql-size-large { font-size: 1.5em; }
+    .ql-editor .ql-size-small { font-size: 0.85em; }
+
+    /* Cover image preview */
+    .cover-preview { margin-top: 12px; }
+    .cover-preview img { max-width: 100%; max-height: 200px; object-fit: cover; border: 1px solid var(--border); display: block; }
   </style>
 </head>
 <body>
@@ -124,6 +163,7 @@
       <div class="panel active" id="panel-dashboard">
         <div class="panel-header">
           <h1 class="panel-title">Dashboard</h1>
+          <button class="btn btn-sm" onclick="showPanel('new')">+ New Post</button>
         </div>
         <div class="stats-grid">
           <div class="stat-card"><div class="stat-label">Total Posts</div><div class="stat-value" id="statTotal">—</div></div>
@@ -132,7 +172,6 @@
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
           <div class="mono-sm" style="font-size:10px; letter-spacing:0.18em; text-transform:uppercase;">Recent Posts</div>
-          <button class="btn btn-sm" onclick="showPanel('new')">+ New Post</button>
         </div>
         <div id="recentPosts"></div>
       </div>
@@ -153,11 +192,13 @@
         </div>
         <div class="editor-form">
           <input type="hidden" id="editId" />
+
           <div class="form-group">
             <label>Title</label>
             <input type="text" id="postTitle" placeholder="Post title" />
           </div>
-          <div class="editor-row">
+
+          <div class="editor-row-3">
             <div class="form-group">
               <label>Category</label>
               <input type="text" id="postCategory" placeholder="e.g. Markets, Macro, Company" />
@@ -166,27 +207,36 @@
               <label>Date</label>
               <input type="date" id="postDate" />
             </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="postStatus">
+                <option value="false">Draft</option>
+                <option value="true">Published</option>
+              </select>
+            </div>
           </div>
+
           <div class="form-group">
-            <label>Excerpt <span style="text-transform:none; letter-spacing:0; font-weight:300;">(optional)</span></label>
-            <input type="text" id="postExcerpt" placeholder="Short preview shown on homepage" />
+            <label>Excerpt <span style="text-transform:none; letter-spacing:0; font-weight:300;">(short preview on homepage)</span></label>
+            <input type="text" id="postExcerpt" placeholder="One sentence summary shown on the homepage listing" />
           </div>
+
+          <div class="form-group">
+            <label>Cover Image URL <span style="text-transform:none; letter-spacing:0; font-weight:300;">(optional)</span></label>
+            <input type="text" id="postCover" placeholder="https://..." oninput="previewCover(this.value)" />
+            <div class="cover-preview" id="coverPreview"></div>
+          </div>
+
           <div class="form-group">
             <label>Body</label>
-            <textarea id="postBody" placeholder="Write your post here. Separate paragraphs with a blank line."></textarea>
-            <div class="form-hint">Separate paragraphs with a blank line (double Enter)</div>
+            <div id="quillEditor"></div>
+            <div class="form-hint">Use the toolbar to format text — headings, bold, italic, underline, lists, links, images, blockquotes, and more.</div>
           </div>
-          <div class="form-group">
-            <label>Status</label>
-            <select id="postStatus">
-              <option value="false">Draft — not visible on site</option>
-              <option value="true">Published — visible on site</option>
-            </select>
-          </div>
+
           <div class="editor-actions">
             <button class="btn" onclick="savePost()">Save Post</button>
             <button class="btn btn-ghost" onclick="clearEditor()">Clear</button>
-            <span class="success-msg" id="saveMsg" style="display:none;"></span>
+            <span id="saveMsg" style="display:none;"></span>
           </div>
         </div>
       </div>
@@ -194,40 +244,45 @@
     </main>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
   <script>
-    // ── CONFIG — change this password! ──
+    // ── CONFIG ──
     const ADMIN_PASSWORD = 'apexadmin2026';
     const SUPABASE_URL = 'https://gmhpcrjeggrmgrmxdrac.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtaHBjcmplZ2dybWdybXhkcmFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEwNTAzMTQsImV4cCI6MjA4NjYyNjMxNH0.0n32mCi_y02dSpHg_hs7yse1WXcXnlydwO9nBBQUA1I';
 
-    // ── Supabase REST client ──
+    // ── Supabase client ──
     const db = {
-      h: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
-      async select(query) {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/${query}`, { headers: this.h });
-        if (!r.ok) throw new Error(await r.text());
-        return r.json();
-      },
-      async insert(table, data) {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method: 'POST', headers: this.h, body: JSON.stringify(data) });
-        if (!r.ok) throw new Error(await r.text());
-        return r.json();
-      },
-      async update(table, id, data) {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers: this.h, body: JSON.stringify(data) });
-        if (!r.ok) throw new Error(await r.text());
-        return r.json();
-      },
-      async delete(table, id) {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: this.h });
-        if (!r.ok) throw new Error(await r.text());
-      }
+      h: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      async select(q) { const r = await fetch(`${SUPABASE_URL}/rest/v1/${q}`, { headers: this.h }); if (!r.ok) throw new Error(await r.text()); return r.json(); },
+      async insert(t, d) { const r = await fetch(`${SUPABASE_URL}/rest/v1/${t}`, { method: 'POST', headers: this.h, body: JSON.stringify(d) }); if (!r.ok) throw new Error(await r.text()); return r.json(); },
+      async update(t, id, d) { const r = await fetch(`${SUPABASE_URL}/rest/v1/${t}?id=eq.${id}`, { method: 'PATCH', headers: this.h, body: JSON.stringify(d) }); if (!r.ok) throw new Error(await r.text()); return r.json(); },
+      async del(t, id) { const r = await fetch(`${SUPABASE_URL}/rest/v1/${t}?id=eq.${id}`, { method: 'DELETE', headers: this.h }); if (!r.ok) throw new Error(await r.text()); }
     };
+
+    // ── Quill init ──
+    let quill;
+    function initQuill() {
+      if (quill) return;
+      quill = new Quill('#quillEditor', {
+        theme: 'snow',
+        placeholder: 'Write your post here…',
+        modules: {
+          toolbar: [
+            [{ 'header': [1, 2, 3, false] }],
+            [{ 'size': ['small', false, 'large', 'huge'] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            ['blockquote', 'code-block'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            [{ 'indent': '-1' }, { 'indent': '+1' }],
+            ['link', 'image'],
+            [{ 'align': [] }],
+            ['clean']
+          ]
+        }
+      });
+    }
 
     // ── Auth ──
     function attemptLogin() {
@@ -235,18 +290,19 @@
         sessionStorage.setItem('apex_auth', '1');
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('adminPanel').classList.add('active');
+        initQuill();
         refreshDashboard();
       } else {
         document.getElementById('loginError').style.display = 'block';
       }
     }
     document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
-
     function logout() { sessionStorage.removeItem('apex_auth'); location.reload(); }
 
     if (sessionStorage.getItem('apex_auth')) {
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('adminPanel').classList.add('active');
+      setTimeout(initQuill, 50);
       refreshDashboard();
     }
 
@@ -258,8 +314,11 @@
       document.getElementById('nav-' + name).classList.add('active');
       if (name === 'dashboard') refreshDashboard();
       if (name === 'posts') refreshPostsList();
-      if (name === 'new' && !document.getElementById('editId').value) {
-        document.getElementById('postDate').value = new Date().toISOString().slice(0, 10);
+      if (name === 'new') {
+        initQuill();
+        if (!document.getElementById('editId').value) {
+          document.getElementById('postDate').value = new Date().toISOString().slice(0, 10);
+        }
       }
     }
 
@@ -273,12 +332,19 @@
       const el = document.getElementById('saveMsg');
       el.textContent = msg;
       el.style.color = isError ? '#c0392b' : '#27ae60';
+      el.style.fontFamily = "'DM Mono', monospace";
+      el.style.fontSize = '11px';
       el.style.display = 'inline';
       setTimeout(() => el.style.display = 'none', 3500);
     }
 
+    function previewCover(url) {
+      const preview = document.getElementById('coverPreview');
+      preview.innerHTML = url ? `<img src="${url}" onerror="this.style.display='none'" />` : '';
+    }
+
     function postTableHTML(posts) {
-      if (!posts.length) return '<div class="empty-state">No posts yet.</div>';
+      if (!posts.length) return '<div class="empty-state">No posts yet. <a onclick="showPanel(\'new\')" style="cursor:pointer; text-decoration:underline;">Create your first →</a></div>';
       return `<table class="posts-table">
         <thead><tr><th>Title</th><th>Status</th><th>Views</th><th>Date</th><th></th></tr></thead>
         <tbody>${posts.map(p => `
@@ -299,14 +365,12 @@
     async function refreshDashboard() {
       try {
         const posts = await db.select('posts?order=created_at.desc');
-        const published = posts.filter(p => p.published);
-        const views = posts.reduce((s, p) => s + (p.views || 0), 0);
         document.getElementById('statTotal').textContent = posts.length;
-        document.getElementById('statPublished').textContent = published.length;
-        document.getElementById('statViews').textContent = views;
-        document.getElementById('recentPosts').innerHTML = postTableHTML(posts.slice(0, 5));
+        document.getElementById('statPublished').textContent = posts.filter(p => p.published).length;
+        document.getElementById('statViews').textContent = posts.reduce((s, p) => s + (p.views || 0), 0);
+        document.getElementById('recentPosts').innerHTML = postTableHTML(posts.slice(0, 6));
       } catch (e) {
-        document.getElementById('recentPosts').innerHTML = `<div class="empty-state">Error loading posts: ${e.message}</div>`;
+        document.getElementById('recentPosts').innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
       }
     }
 
@@ -327,9 +391,11 @@
       document.getElementById('postCategory').value = '';
       document.getElementById('postDate').value = new Date().toISOString().slice(0, 10);
       document.getElementById('postExcerpt').value = '';
-      document.getElementById('postBody').value = '';
+      document.getElementById('postCover').value = '';
+      document.getElementById('coverPreview').innerHTML = '';
       document.getElementById('postStatus').value = 'false';
       document.getElementById('editorTitle').textContent = 'New Post';
+      if (quill) quill.setContents([]);
     }
 
     async function editPost(id) {
@@ -340,24 +406,32 @@
         document.getElementById('postCategory').value = post.category || '';
         document.getElementById('postDate').value = post.date;
         document.getElementById('postExcerpt').value = post.excerpt || '';
-        document.getElementById('postBody').value = post.body;
+        document.getElementById('postCover').value = post.cover_url || '';
+        previewCover(post.cover_url || '');
         document.getElementById('postStatus').value = post.published ? 'true' : 'false';
         document.getElementById('editorTitle').textContent = 'Edit Post';
         showPanel('new');
+        // Set Quill content after panel is shown
+        setTimeout(() => {
+          if (quill) quill.root.innerHTML = post.body || '';
+        }, 100);
       } catch (e) { alert('Could not load post: ' + e.message); }
     }
 
     async function savePost() {
       const title = document.getElementById('postTitle').value.trim();
-      const body = document.getElementById('postBody').value.trim();
+      const body = quill ? quill.root.innerHTML : '';
+      const textContent = quill ? quill.getText().trim() : '';
+
       if (!title) { showMsg('Please enter a title.', true); return; }
-      if (!body) { showMsg('Please enter content.', true); return; }
+      if (!textContent) { showMsg('Please write some content.', true); return; }
 
       const data = {
         title,
         category: document.getElementById('postCategory').value.trim() || null,
         date: document.getElementById('postDate').value || new Date().toISOString().slice(0, 10),
         excerpt: document.getElementById('postExcerpt').value.trim() || null,
+        cover_url: document.getElementById('postCover').value.trim() || null,
         body,
         published: document.getElementById('postStatus').value === 'true'
       };
@@ -379,7 +453,7 @@
     async function deletePost(id) {
       if (!confirm('Delete this post permanently?')) return;
       try {
-        await db.delete('posts', id);
+        await db.del('posts', id);
         refreshDashboard();
         refreshPostsList();
       } catch (e) { alert('Error: ' + e.message); }
